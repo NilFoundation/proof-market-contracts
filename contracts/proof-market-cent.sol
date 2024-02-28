@@ -8,6 +8,7 @@ contract ProofMarket {
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
 
     constructor() {
         admin = msg.sender;
@@ -30,6 +31,14 @@ contract ProofMarket {
         (bool sent,) = user.call{value: amount}("");
         require(sent, "Failed to send Ether");
         emit Withdraw(user, amount);
+    }
+
+    function transfer(address from, address to, uint256 amount) public {
+        require(msg.sender == admin, "Only the admin can perform this action");
+        require(balances[from] >= amount, "Insufficient balance in the source address");
+        balances[from] -= amount;
+        balances[to] += amount;
+        emit Transfer(from, to, amount);
     }
 
     receive() external payable {
